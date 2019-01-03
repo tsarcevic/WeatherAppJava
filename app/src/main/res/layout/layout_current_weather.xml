@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/current_weather_background"
+    android:fitsSystemWindows="true"
+    android:maxHeight="300dp"
+    app:layout_collapseMode="parallax">
+
+    <ImageView
+        android:id="@+id/layout_current_weather_icon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_weather_placeholder"
+        app:layout_constraintBottom_toTopOf="@id/layout_current_weather_description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/layout_current_weather_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:hint="Current conditions"
+        android:maxLines="2"
+        android:paddingStart="16dp"
+        android:text="Current conditions: "
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorGrey"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/layout_current_weather_temperature"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_current_weather_icon" />
+
+    <TextView
+        android:id="@+id/layout_current_weather_city"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:hint="City, State"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorGrey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/layout_current_weather_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/layout_current_weather_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Current temperature"
+        android:maxLines="2"
+        android:text="Current temperature: "
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorGrey"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/layout_current_weather_icon"
+        app:layout_constraintTop_toBottomOf="@id/layout_current_weather_city" />
+
+    <TextView
+        android:id="@+id/layout_current_weather_min_max_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:hint="Min - Max temperature"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorGrey"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/layout_current_weather_icon"
+        app:layout_constraintTop_toBottomOf="@id/layout_current_weather_temperature" />
+
+    <TextView
+        android:id="@+id/layout_current_weather_pressure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:hint="Pressure"
+        android:text="Pressure:"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorGrey"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/layout_current_weather_icon"
+        app:layout_constraintTop_toBottomOf="@id/layout_current_weather_min_max_temperature" />
+
+    <TextView
+        android:id="@+id/layout_current_weather_humidity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:hint="Humidity"
+        android:text="Humidity:"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorGrey"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/layout_current_weather_icon"
+        app:layout_constraintTop_toBottomOf="@id/layout_current_weather_pressure" />
+
+
+</android.support.constraint.ConstraintLayout>
