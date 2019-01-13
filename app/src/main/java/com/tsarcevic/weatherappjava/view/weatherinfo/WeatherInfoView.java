@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
+import com.tsarcevic.weatherappjava.model.CurrentTemperatureResponse;
 import com.tsarcevic.weatherappjava.model.WeatherResponse;
 import com.tsarcevic.weatherappjava.viewmodel.WeatherInfoViewModel;
 
@@ -98,11 +99,13 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         viewModel = ViewModelProviders.of(this).get(WeatherInfoViewModel.class);
         observeData();
         viewModel.getWeatherInformation("osijek");
+        viewModel.getCurrentWeatherInformation("osijek");
         progressBar.setVisibility(View.VISIBLE);
     }
 
     private void observeData() {
         viewModel.getWeatherResponse().observe(this, this::showWeatherData);
+        viewModel.getCurrentWeatherResponse().observe(this, this::showCurrentWeatherData);
         viewModel.getWeatherResponseError().observe(this, this::showError);
         viewModel.getLoading().observe(this, this::toggleProgress);
     }
@@ -111,19 +114,23 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    private void showCurrentWeatherData(CurrentTemperatureResponse weatherResponse) {
+        layoutCurrentWeatherCity.setText(weatherResponse.getName());
+        layoutCurrentWeatherTemperature.setText("Current temperature: " + weatherResponse.getCurrentWeather().getTemperature().toString() + "°C");
+        layoutCurrentWeatherPressure.setText("Pressure: " + weatherResponse.getCurrentWeather().getPressure().toString() + " hPa");
+        layoutCurrentWeatherHumidity.setText("Humidity: " + weatherResponse.getCurrentWeather().getHumidity() + "%");
+        layoutCurrentWeatherMinMaxTemperature.setText(weatherResponse.getCurrentWeather().getMinimumTemperature().toString() + "°C - "
+                + weatherResponse.getCurrentWeather().getMaximumTemperature().toString() + "°C");
+        layoutCurrentWeatherDescription.setText("Current condition: " + weatherResponse.getWeather().get(0).getDescription());
+        Glide.with(this)
+                .load(Constants.WEATHER_CODE_URL + weatherResponse.getWeather().get(0).getIcon() + ".png")
+                .into(layoutCurrentWeatherIcon);
+    }
+
     private void showWeatherData(WeatherResponse weatherResponse) {
         layoutFutureWeatherRecycler.setVisibility(View.VISIBLE);
 
         adapter.setWeatherInfoList(weatherResponse.getWeatherInfoList());
-        layoutCurrentWeatherCity.setText(weatherResponse.getCity().getName() + ", " + weatherResponse.getCity().getCountry());
-        layoutCurrentWeatherTemperature.setText("Current temperature: " + weatherResponse.getWeatherInfoList().get(0).getCurrentWeatherInfo().getTemperature().toString() + "°C");
-        layoutCurrentWeatherPressure.setText("Pressure: " + weatherResponse.getWeatherInfoList().get(0).getCurrentWeatherInfo().getPressure().toString() + " hPa");
-        layoutCurrentWeatherHumidity.setText("Humidity: " + weatherResponse.getWeatherInfoList().get(0).getCurrentWeatherInfo().getHumidity() + "%");
-        layoutCurrentWeatherMinMaxTemperature.setText(weatherResponse.getWeatherInfoList().get(0).getCurrentWeatherInfo().getMinimumTemperature() + "°C - " + weatherResponse.getWeatherInfoList().get(0).getCurrentWeatherInfo().getMaximumTemperature() + "°C");
-        layoutCurrentWeatherDescription.setText("Current condition: " + weatherResponse.getWeatherInfoList().get(0).getWeather().get(0).getDescription());
-        Glide.with(this)
-                .load(Constants.WEATHER_CODE_URL + weatherResponse.getWeatherInfoList().get(0).getWeather().get(0).getIcon() + ".png")
-                .into(layoutCurrentWeatherIcon);
 
         weatherInfoAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             boolean isShow = true;
@@ -155,5 +162,6 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
 
         replaceCityDialogFragment.dismiss();
         viewModel.getWeatherInformation(cityName);
+        viewModel.getCurrentWeatherInformation(cityName);
     }
 }
