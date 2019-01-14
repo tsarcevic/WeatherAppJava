@@ -98,8 +98,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     private void initViewModel() {
         viewModel = ViewModelProviders.of(this).get(WeatherInfoViewModel.class);
         observeData();
-        viewModel.getWeatherInformation("osijek");
-        viewModel.getCurrentWeatherInformation("osijek");
+        viewModel.getFullWeatherInformation("osijek");
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -161,7 +160,6 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         layoutFutureWeatherRecycler.setVisibility(View.GONE);
 
         replaceCityDialogFragment.dismiss();
-        viewModel.getWeatherInformation(cityName);
-        viewModel.getCurrentWeatherInformation(cityName);
+        viewModel.getFullWeatherInformation(cityName);
     }
 }

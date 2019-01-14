@@ -6,8 +6,11 @@ import com.tsarcevic.weatherappjava.base.BaseViewModel;
 import com.tsarcevic.weatherappjava.interaction.WeatherInteraction;
 import com.tsarcevic.weatherappjava.interaction.WeatherInteractionImpl;
 import com.tsarcevic.weatherappjava.model.CurrentTemperatureResponse;
+import com.tsarcevic.weatherappjava.model.WeatherFinal;
 import com.tsarcevic.weatherappjava.model.WeatherResponse;
 
+import io.reactivex.Flowable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -18,6 +21,25 @@ public class WeatherInfoViewModel extends BaseViewModel {
     private MutableLiveData<WeatherResponse> weatherResponse = new MutableLiveData<>();
     private MutableLiveData<CurrentTemperatureResponse> currentWeatherResponse = new MutableLiveData<>();
     private MutableLiveData<Boolean> weatherResponseError = new MutableLiveData<>();
+
+    public void getFullWeatherInformation(String city) {
+        // TODO: 14.1.2019. do Ivan's solution
+        loading.setValue(true);
+        addSubscription(Single.zip(weatherInteraction.getCityInfo(city), weatherInteraction.getCurrentWeatherInfo(city),
+                (cityInfoResponse, currentWeatherResponse) -> new WeatherFinal(currentWeatherResponse, cityInfoResponse)).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleFulLWeatherInfoResponse, this::handleFullWeatherInfoResponseError));
+    }
+
+    private void handleFullWeatherInfoResponseError(Throwable throwable) {
+        loading.setValue(false);
+    }
+
+    private void handleFulLWeatherInfoResponse(WeatherFinal weatherFinal) {
+        loading.setValue(false);
+        weatherResponse.setValue(weatherFinal.getWeatherResponse());
+        currentWeatherResponse.setValue(weatherFinal.getCurrentTemperatureResponse());
+    }
 
 
     public void getWeatherInformation(String city) {
