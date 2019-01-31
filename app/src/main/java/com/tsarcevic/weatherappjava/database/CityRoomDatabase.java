@@ -7,7 +7,7 @@ import android.content.Context;
 
 import com.tsarcevic.weatherappjava.model.local.City;
 
-@Database(entities = {City.class}, version = 1, exportSchema = false)
+@Database(entities = {City.class}, version = 2, exportSchema = false)
 public abstract class CityRoomDatabase extends RoomDatabase {
 
     public abstract CityDao cityDao();
@@ -18,6 +18,7 @@ public abstract class CityRoomDatabase extends RoomDatabase {
         if (cityRoomDatabase == null) {
             cityRoomDatabase = Room.databaseBuilder(context.getApplicationContext(), CityRoomDatabase.class, "city_database")
                     .allowMainThreadQueries()
+                    .fallbackToDestructiveMigration()
                     .build();
         }
 

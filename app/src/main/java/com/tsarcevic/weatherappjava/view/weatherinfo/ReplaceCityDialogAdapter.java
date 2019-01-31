@@ -29,12 +29,7 @@ public class ReplaceCityDialogAdapter extends RecyclerView.Adapter<ReplaceCityDi
 
     public void setCityName(List<City> cityName) {
         cityNameList.clear();
-        if (cityName.size() > 10) {
-            for (int i = cityName.size() - 10; i < cityName.size(); i++)
-                cityNameList.add(cityName.get(i));
-        } else {
-            cityNameList.addAll(cityName);
-        }
+        cityNameList.addAll(cityName);
         notifyDataSetChanged();
     }
 
