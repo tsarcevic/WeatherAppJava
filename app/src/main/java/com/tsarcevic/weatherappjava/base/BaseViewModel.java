@@ -1,5 +1,6 @@
 package com.tsarcevic.weatherappjava.base;
 
+import android.app.Application;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 

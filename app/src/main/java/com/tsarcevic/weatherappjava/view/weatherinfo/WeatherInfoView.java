@@ -1,11 +1,11 @@
 package com.tsarcevic.weatherappjava.view.weatherinfo;
 
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.arch.lifecycle.ViewModelProviders;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,19 +20,22 @@ import com.bumptech.glide.Glide;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
-import com.tsarcevic.weatherappjava.model.CurrentTemperatureResponse;
-import com.tsarcevic.weatherappjava.model.WeatherResponse;
+import com.tsarcevic.weatherappjava.model.remote.CurrentTemperatureResponse;
+import com.tsarcevic.weatherappjava.model.remote.WeatherError;
+import com.tsarcevic.weatherappjava.model.remote.WeatherResponse;
+import com.tsarcevic.weatherappjava.viewmodel.CityViewModel;
 import com.tsarcevic.weatherappjava.viewmodel.WeatherInfoViewModel;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFragment.OnClickListener {
+public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFragment.ButtonClickListener {
 
-    private WeatherInfoViewModel viewModel;
+    private WeatherInfoViewModel weatherViewModel;
     private WeatherInfoAdapter adapter;
+    private CityViewModel cityViewModel;
 
-    DialogFragment replaceCityDialogFragment;
+    private DialogFragment replaceCityDialogFragment;
 
     @BindView(R.id.layout_current_weather_icon)
     ImageView layoutCurrentWeatherIcon;
@@ -58,18 +61,20 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     AppBarLayout weatherInfoAppBarLayout;
     @BindView(R.id.activity_weather_info_view_progress)
     ProgressBar progressBar;
+    @BindView(R.id.activity_weather_info_view_error)
+    TextView errorMessage;
 
     @OnClick(R.id.activity_weather_info_view_replace_city)
     public void onReplaceCityClicked() {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        Fragment fragment = getFragmentManager().findFragmentByTag("replace_city");
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("replace_city");
         if (fragment != null) {
             ft.remove(fragment);
         }
         ft.addToBackStack(null);
 
         replaceCityDialogFragment = new ReplaceCityDialogFragment();
-        ((ReplaceCityDialogFragment) replaceCityDialogFragment).setOnClickListener(this);
+        ((ReplaceCityDialogFragment) replaceCityDialogFragment).setButtonClickListener(this);
         replaceCityDialogFragment.show(ft, "replace_city");
     }
 
@@ -96,17 +101,18 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this).get(WeatherInfoViewModel.class);
+        weatherViewModel = ViewModelProviders.of(this).get(WeatherInfoViewModel.class);
+        cityViewModel = new CityViewModel(getApplication());
         observeData();
-        viewModel.getFullWeatherInformation("osijek");
+        weatherViewModel.getFullWeatherInformation("osijek");
         progressBar.setVisibility(View.VISIBLE);
     }
 
     private void observeData() {
-        viewModel.getWeatherResponse().observe(this, this::showWeatherData);
-        viewModel.getCurrentWeatherResponse().observe(this, this::showCurrentWeatherData);
-        viewModel.getWeatherResponseError().observe(this, this::showError);
-        viewModel.getLoading().observe(this, this::toggleProgress);
+        weatherViewModel.getWeatherResponse().observe(this, this::showWeatherData);
+        weatherViewModel.getCurrentWeatherResponse().observe(this, this::showCurrentWeatherData);
+        weatherViewModel.getWeatherResponseError().observe(this, this::showError);
+        weatherViewModel.getLoading().observe(this, this::toggleProgress);
     }
 
     private void toggleProgress(Boolean isLoading) {
@@ -114,6 +120,11 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     }
 
     private void showCurrentWeatherData(CurrentTemperatureResponse weatherResponse) {
+        cityViewModel.saveCity(weatherResponse.getName());
+
+        weatherInfoAppBarLayout.setVisibility(View.VISIBLE);
+        errorMessage.setVisibility(View.GONE);
+
         layoutCurrentWeatherCity.setText(weatherResponse.getName());
         layoutCurrentWeatherTemperature.setText("Current temperature: " + weatherResponse.getCurrentWeather().getTemperature().toString() + "°C");
         layoutCurrentWeatherPressure.setText("Pressure: " + weatherResponse.getCurrentWeather().getPressure().toString() + " hPa");
@@ -127,7 +138,10 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     }
 
     private void showWeatherData(WeatherResponse weatherResponse) {
+        cityViewModel.saveCity(weatherResponse.getCity().getName());
+
         layoutFutureWeatherRecycler.setVisibility(View.VISIBLE);
+        errorMessage.setVisibility(View.GONE);
 
         adapter.setWeatherInfoList(weatherResponse.getWeatherInfoList());
 
@@ -151,15 +165,17 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         });
     }
 
-    private void showError(Boolean error) {
-        Toast.makeText(this, "Something went horribly wrong", Toast.LENGTH_SHORT).show();
+    private void showError(WeatherError error) {
+        errorMessage.setVisibility(View.VISIBLE);
+        errorMessage.setText(error.getMessage());
     }
 
     @Override
     public void onButtonClicked(String cityName) {
         layoutFutureWeatherRecycler.setVisibility(View.GONE);
+        weatherInfoAppBarLayout.setVisibility(View.GONE);
 
         replaceCityDialogFragment.dismiss();
-        viewModel.getFullWeatherInformation(cityName);
+        weatherViewModel.getFullWeatherInformation(cityName);
     }
 }

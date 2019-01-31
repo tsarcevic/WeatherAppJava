@@ -1,4 +1,4 @@
-package com.tsarcevic.weatherappjava.model;
+package com.tsarcevic.weatherappjava.model.remote;
 
 public class WeatherFinal {
 

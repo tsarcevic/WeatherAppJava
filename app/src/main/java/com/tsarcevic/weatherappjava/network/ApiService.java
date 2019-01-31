@@ -1,7 +1,7 @@
 package com.tsarcevic.weatherappjava.network;
 
-import com.tsarcevic.weatherappjava.model.CurrentTemperatureResponse;
-import com.tsarcevic.weatherappjava.model.WeatherResponse;
+import com.tsarcevic.weatherappjava.model.remote.CurrentTemperatureResponse;
+import com.tsarcevic.weatherappjava.model.remote.WeatherResponse;
 
 import io.reactivex.Single;
 import retrofit2.http.GET;

@@ -1,9 +1,7 @@
-package com.tsarcevic.weatherappjava.model;
+package com.tsarcevic.weatherappjava.model.remote;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
 
 public class City {
 

@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
-import com.tsarcevic.weatherappjava.model.WeatherInfo;
+import com.tsarcevic.weatherappjava.model.remote.WeatherInfo;
 import com.tsarcevic.weatherappjava.util.DateUtil;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.ViewModel> {
+public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.ViewHolder> {
 
     private List<WeatherInfo> weatherInfoList = new ArrayList<>();
 
@@ -32,13 +32,13 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.
 
     @NonNull
     @Override
-    public ViewModel onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_weather, parent, false);
-        return new ViewModel(v);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewModel holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WeatherInfo weatherInfo = weatherInfoList.get(position);
         if (weatherInfo != null) {
             holder.setInfo(weatherInfo);
@@ -50,7 +50,7 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.
         return weatherInfoList.size();
     }
 
-    public class ViewModel extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.item_weather_icon)
         ImageView itemWeatherIcon;
@@ -59,7 +59,7 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.
         @BindView(R.id.item_weather_temperature)
         TextView itemWeatherTemperature;
 
-        public ViewModel(View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
