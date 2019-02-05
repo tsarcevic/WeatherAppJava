@@ -1,6 +1,7 @@
 package com.tsarcevic.weatherappjava.view.weatherinfo;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.DialogFragment;
@@ -17,6 +18,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.facebook.AccessToken;
+import com.facebook.login.LoginManager;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
@@ -34,6 +42,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     private WeatherInfoViewModel weatherViewModel;
     private WeatherInfoAdapter adapter;
     private CityViewModel cityViewModel;
+    private GoogleSignInClient googleSignInClient;
 
     private DialogFragment replaceCityDialogFragment;
 
@@ -78,6 +87,23 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         replaceCityDialogFragment.show(ft, "replace_city");
     }
 
+    @OnClick(R.id.activity_weather_info_view_logout)
+    public void onLogoutClicked() {
+        if (GoogleSignIn.getLastSignedInAccount(this) != null) {
+            googleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    finish();
+                }
+            });
+        } else if(AccessToken.getCurrentAccessToken() != null) {
+            LoginManager.getInstance().logOut();
+            finish();
+        } else {
+            Toast.makeText(this, "Niste logirani!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected int getLayout() {
         return R.layout.activity_weather_info_view;
@@ -85,8 +111,17 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
 
     @Override
     protected void initUI() {
+        initGoogle();
         initRecycler();
         initViewModel();
+    }
+
+    private void initGoogle() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
     private void initRecycler() {

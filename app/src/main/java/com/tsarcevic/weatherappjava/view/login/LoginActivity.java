@@ -1,13 +1,7 @@
 package com.tsarcevic.weatherappjava.view.login;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.facebook.CallbackManager;
@@ -18,23 +12,41 @@ import com.facebook.GraphResponse;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.Task;
+import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
+import com.tsarcevic.weatherappjava.view.weatherinfo.WeatherInfoView;
 
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
 public class LoginActivity extends BaseActivity {
 
     private CallbackManager callbackManager;
+    private GoogleSignInClient googleSignInClient;
 
-    @BindView(R.id.activity_login_login_button)
+    @BindView(R.id.activity_login_facebook_button)
     LoginButton loginButton;
+
+    @OnClick(R.id.activity_login_google_button)
+    public void onGoogleButtonClicked() {
+        Intent intent = googleSignInClient.getSignInIntent();
+        startActivityForResult(intent, Constants.GOOGLE_LOGIN_REQUEST_CODE);
+    }
+
+    @OnClick(R.id.activity_login_without_login_button)
+    public void onContinueWithoutLoginButton() {
+        startActivity(new Intent(this, WeatherInfoView.class));
+    }
 
     @Override
     protected int getLayout() {
@@ -43,24 +55,31 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initUI() {
-        printKeyHash();
         initFacebookLogin();
+        initGoogleLogin();
     }
 
-    private void printKeyHash() {
-        // Add code to print out the key hash
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo("YOUR PACKAGE NAME", PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("KeyHash:", e.toString());
-        } catch (NoSuchAlgorithmException e) {
-            Log.e("KeyHash:", e.toString());
+    @Override
+    protected void onStart() {
+        super.onStart();
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        startWeatherActivity(signInAccount);
+    }
+
+    private void startWeatherActivity(GoogleSignInAccount signInAccount) {
+        if (signInAccount != null) {
+            startActivity(new Intent(this, WeatherInfoView.class));
         }
+    }
+
+    @Override
+    protected void initGoogleLogin() {
+        super.initGoogleLogin();
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(getApplication(), signInOptions);
     }
 
     private void initFacebookLogin() {
@@ -81,6 +100,7 @@ public class LoginActivity extends BaseActivity {
                 parameters.putString("fields", "email");
                 request.setParameters(parameters);
                 request.executeAsync();
+                startActivity(new Intent(getApplicationContext(), WeatherInfoView.class));
             }
 
             @Override
@@ -99,5 +119,10 @@ public class LoginActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Constants.GOOGLE_LOGIN_REQUEST_CODE) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            startWeatherActivity(task.getResult());
+        }
     }
 }
