@@ -1,7 +1,15 @@
 package com.tsarcevic.weatherappjava.view.login;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 import com.facebook.CallbackManager;
@@ -20,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
+import com.tsarcevic.weatherappjava.view.map.MapPickerActivity;
 import com.tsarcevic.weatherappjava.view.weatherinfo.WeatherInfoView;
 
 import org.json.JSONObject;
@@ -100,7 +109,8 @@ public class LoginActivity extends BaseActivity {
                 parameters.putString("fields", "email");
                 request.setParameters(parameters);
                 request.executeAsync();
-                startActivity(new Intent(getApplicationContext(), WeatherInfoView.class));
+
+                startNewActivity();
             }
 
             @Override
@@ -113,6 +123,34 @@ public class LoginActivity extends BaseActivity {
                 Toast.makeText(LoginActivity.this, "Something went horribly wrong", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void startNewActivity() {
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this, MapPickerActivity.class);
+        intent.putExtra(Constants.STARTING_ACTIVITY, Constants.STARTING_ACTIVITY_LOGIN);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, Constants.PENDING_INTENT_REQUEST_CODE, intent, 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "channelFacebook")
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("Facebook")
+                .setContentText("Prijavili ste se putem facebooka!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = new NotificationChannel("10001", "NOTIFICATION_CHANNEL_NAME", NotificationManager.IMPORTANCE_HIGH);
+            builder.setChannelId("10001");
+            manager.createNotificationChannel(notificationChannel);
+        }
+
+        manager.notify(15, builder.build());
+
+        startActivity(new Intent(getApplicationContext(), WeatherInfoView.class));
     }
 
     @Override

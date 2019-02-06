@@ -8,4 +8,8 @@ public class Constants {
     public static String METRIC = "metric";
 
     public static final int GOOGLE_LOGIN_REQUEST_CODE = 1;
+    public static final int PENDING_INTENT_REQUEST_CODE = 1;
+    public static final int STARTING_ACTIVITY_LOGIN = 1;
+    public static final int STARTING_ACTIVITY_WEATHER_INFO = 2;
+    public static final String STARTING_ACTIVITY = "starting_activity";
 }
