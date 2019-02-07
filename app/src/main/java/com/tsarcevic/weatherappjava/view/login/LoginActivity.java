@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -54,7 +55,7 @@ public class LoginActivity extends BaseActivity {
 
     @OnClick(R.id.activity_login_without_login_button)
     public void onContinueWithoutLoginButton() {
-        startActivity(new Intent(this, WeatherInfoView.class));
+        startNewActivity();
     }
 
     @Override
@@ -72,11 +73,17 @@ public class LoginActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        startWeatherActivity(signInAccount);
+        startWeatherActivity(signInAccount, false);
+        if (AccessToken.getCurrentAccessToken() != null) {
+            startWeatherActivity(null, true);
+        }
     }
 
-    private void startWeatherActivity(GoogleSignInAccount signInAccount) {
+    private void startWeatherActivity(GoogleSignInAccount signInAccount, boolean isFacebookLogged) {
         if (signInAccount != null) {
+            startActivity(new Intent(this, WeatherInfoView.class));
+        }
+        if (isFacebookLogged) {
             startActivity(new Intent(this, WeatherInfoView.class));
         }
     }
@@ -109,8 +116,7 @@ public class LoginActivity extends BaseActivity {
                 parameters.putString("fields", "email");
                 request.setParameters(parameters);
                 request.executeAsync();
-
-                startNewActivity();
+                startActivity(new Intent(getApplicationContext(), WeatherInfoView.class));
             }
 
             @Override
@@ -126,20 +132,32 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void startNewActivity() {
+        showNotification();
+
+        startActivity(new Intent(getApplicationContext(), WeatherInfoView.class));
+    }
+
+    private void showNotification() {
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent intent = new Intent(this, MapPickerActivity.class);
-        intent.putExtra(Constants.STARTING_ACTIVITY, Constants.STARTING_ACTIVITY_LOGIN);
+        intent.setAction("Osijek");
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
+        Intent intent2 = new Intent(this, MapPickerActivity.class);
+        intent2.setAction("Zagreb");
+        intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(this, Constants.PENDING_INTENT_REQUEST_CODE, intent, 0);
+        PendingIntent pendingIntent2 = PendingIntent.getActivity(this, Constants.PENDING_INTENT_REQUEST_CODE, intent2, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "channelFacebook")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("Facebook")
-                .setContentText("Prijavili ste se putem facebooka!")
+                .setContentTitle("Lokacija")
+                .setContentText("Odaberite lokaciju")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
+                .addAction(R.drawable.ic_replace, "Osijek", pendingIntent)
+                .addAction(R.drawable.ic_replace, "Zagreb", pendingIntent2)
                 .setAutoCancel(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -149,8 +167,6 @@ public class LoginActivity extends BaseActivity {
         }
 
         manager.notify(15, builder.build());
-
-        startActivity(new Intent(getApplicationContext(), WeatherInfoView.class));
     }
 
     @Override
@@ -160,7 +176,7 @@ public class LoginActivity extends BaseActivity {
 
         if (requestCode == Constants.GOOGLE_LOGIN_REQUEST_CODE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            startWeatherActivity(task.getResult());
+            startWeatherActivity(task.getResult(), false);
         }
     }
 }

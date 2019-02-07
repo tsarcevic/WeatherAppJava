@@ -1,9 +1,11 @@
 package com.tsarcevic.weatherappjava.view.weatherinfo;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -31,6 +33,7 @@ import com.tsarcevic.weatherappjava.base.BaseActivity;
 import com.tsarcevic.weatherappjava.model.remote.CurrentTemperatureResponse;
 import com.tsarcevic.weatherappjava.model.remote.WeatherError;
 import com.tsarcevic.weatherappjava.model.remote.WeatherResponse;
+import com.tsarcevic.weatherappjava.view.map.MapPickerActivity;
 import com.tsarcevic.weatherappjava.viewmodel.CityViewModel;
 import com.tsarcevic.weatherappjava.viewmodel.WeatherInfoViewModel;
 
@@ -43,6 +46,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     private WeatherInfoAdapter adapter;
     private CityViewModel cityViewModel;
     private GoogleSignInClient googleSignInClient;
+    private boolean isToggleClicked = true;
 
     private DialogFragment replaceCityDialogFragment;
 
@@ -72,8 +76,25 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     ProgressBar progressBar;
     @BindView(R.id.activity_weather_info_view_error)
     TextView errorMessage;
+    @BindView(R.id.activity_weather_info_view_replace_city_button)
+    FloatingActionButton replaceCity;
+    @BindView(R.id.activity_weather_info_view_map_button)
+    FloatingActionButton showMap;
+    @BindView(R.id.activity_weather_info_view_logout_button)
+    FloatingActionButton logout;
+    @BindView(R.id.activity_weather_info_view_toggle_options)
+    FloatingActionButton toggleOptions;
 
-    @OnClick(R.id.activity_weather_info_view_replace_city)
+    @OnClick(R.id.activity_weather_info_view_toggle_options)
+    public void onToggleClicked() {
+        replaceCity.setVisibility(isToggleClicked ? View.VISIBLE : View.GONE);
+        showMap.setVisibility(isToggleClicked ? View.VISIBLE : View.GONE);
+        logout.setVisibility(isToggleClicked ? View.VISIBLE : View.GONE);
+        toggleOptions.setImageResource(isToggleClicked ? R.drawable.ic_hide : R.drawable.ic_show);
+        isToggleClicked = !isToggleClicked;
+    }
+
+    @OnClick(R.id.activity_weather_info_view_replace_city_button)
     public void onReplaceCityClicked() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("replace_city");
@@ -87,7 +108,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         replaceCityDialogFragment.show(ft, "replace_city");
     }
 
-    @OnClick(R.id.activity_weather_info_view_logout)
+    @OnClick(R.id.activity_weather_info_view_logout_button)
     public void onLogoutClicked() {
         if (GoogleSignIn.getLastSignedInAccount(this) != null) {
             googleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
@@ -96,12 +117,19 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
                     finish();
                 }
             });
-        } else if(AccessToken.getCurrentAccessToken() != null) {
+        } else if (AccessToken.getCurrentAccessToken() != null) {
             LoginManager.getInstance().logOut();
             finish();
         } else {
             Toast.makeText(this, "Niste logirani!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @OnClick(R.id.activity_weather_info_view_map_button)
+    public void onMapButtonClicked() {
+        Intent intent = new Intent(this, MapPickerActivity.class);
+        intent.putExtra(Constants.STARTING_ACTIVITY, Constants.STARTING_ACTIVITY_WEATHER_INFO);
+        startActivity(intent);
     }
 
     @Override
