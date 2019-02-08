@@ -2,7 +2,6 @@ package com.tsarcevic.weatherappjava.view.weatherinfo;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -17,16 +16,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.facebook.AccessToken;
-import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
@@ -110,19 +104,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
 
     @OnClick(R.id.activity_weather_info_view_logout_button)
     public void onLogoutClicked() {
-        if (GoogleSignIn.getLastSignedInAccount(this) != null) {
-            googleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    finish();
-                }
-            });
-        } else if (AccessToken.getCurrentAccessToken() != null) {
-            LoginManager.getInstance().logOut();
-            finish();
-        } else {
-            Toast.makeText(this, "Niste logirani!", Toast.LENGTH_SHORT).show();
-        }
+        logoutUser();
     }
 
     @OnClick(R.id.activity_weather_info_view_map_button)
@@ -149,7 +131,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
                 .requestEmail()
                 .build();
 
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        initGoogleSignInClient(gso);
     }
 
     private void initRecycler() {

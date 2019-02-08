@@ -45,6 +45,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.map.MapPickerActivity"></activity>
+
+        <service android:name=".service.LogoutService"
+            />
     </application>
 
 </manifest>
