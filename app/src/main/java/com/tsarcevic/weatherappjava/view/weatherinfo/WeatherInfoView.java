@@ -18,7 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.tsarcevic.weatherappjava.Constants;
@@ -135,7 +134,8 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
     }
 
     private void initRecycler() {
-        adapter = new WeatherInfoAdapter();
+        adapter = new WeatherInfoAdapter(this);
+        adapter.setListener(null);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
@@ -188,7 +188,7 @@ public class WeatherInfoView extends BaseActivity implements ReplaceCityDialogFr
         layoutFutureWeatherRecycler.setVisibility(View.VISIBLE);
         errorMessage.setVisibility(View.GONE);
 
-        adapter.setWeatherInfoList(weatherResponse.getWeatherInfoList());
+        adapter.setData(weatherResponse.getWeatherInfoList());
 
         weatherInfoAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             boolean isShow = true;

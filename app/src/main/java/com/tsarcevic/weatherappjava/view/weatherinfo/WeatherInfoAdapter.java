@@ -1,8 +1,7 @@
 package com.tsarcevic.weatherappjava.view.weatherinfo;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -11,46 +10,27 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
+import com.tsarcevic.weatherappjava.base.BaseAdapter;
+import com.tsarcevic.weatherappjava.base.BaseViewHolder;
+import com.tsarcevic.weatherappjava.listener.RecyclerItemClickListener;
 import com.tsarcevic.weatherappjava.model.remote.WeatherInfo;
 import com.tsarcevic.weatherappjava.util.DateUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.ViewHolder> {
+public class WeatherInfoAdapter extends BaseAdapter<WeatherInfo, RecyclerItemClickListener<WeatherInfo>, WeatherInfoAdapter.ViewHolder> {
 
-    private List<WeatherInfo> weatherInfoList = new ArrayList<>();
-
-    public void setWeatherInfoList(List<WeatherInfo> weatherInfoList) {
-        this.weatherInfoList.clear();
-        this.weatherInfoList.addAll(weatherInfoList);
-        notifyDataSetChanged();
+    public WeatherInfoAdapter(Context context) {
+        super(context);
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_weather, parent, false);
-        return new ViewHolder(v);
+    public WeatherInfoAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(inflate(R.layout.item_weather, parent));
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        WeatherInfo weatherInfo = weatherInfoList.get(position);
-        if (weatherInfo != null) {
-            holder.setInfo(weatherInfo);
-        }
-    }
-
-    @Override
-    public int getItemCount() {
-        return weatherInfoList.size();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends BaseViewHolder<WeatherInfo, RecyclerItemClickListener<WeatherInfo>> {
 
         @BindView(R.id.item_weather_icon)
         ImageView itemWeatherIcon;
@@ -61,14 +41,14 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<WeatherInfoAdapter.
 
         public ViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
         }
 
-        public void setInfo(WeatherInfo weatherInfo) {
-            itemWeatherDate.setText(DateUtil.showHourMinuteFormat(weatherInfo.getCurrentDate()));
-            itemWeatherTemperature.setText("Temp: " + weatherInfo.getCurrentWeatherInfo().getTemperature().toString() + "°C");
+        @Override
+        public void onBind(WeatherInfo item, RecyclerItemClickListener<WeatherInfo> listener) {
+            itemWeatherDate.setText(DateUtil.showHourMinuteFormat(item.getCurrentDate()));
+            itemWeatherTemperature.setText("Temp: " + item.getCurrentWeatherInfo().getTemperature().toString() + "°C");
             Glide.with(itemView)
-                    .load(Constants.WEATHER_CODE_URL + weatherInfo.getWeather().get(0).getIcon() + ".png")
+                    .load(Constants.WEATHER_CODE_URL + item.getWeather().get(0).getIcon() + ".png")
                     .into(itemWeatherIcon);
         }
     }

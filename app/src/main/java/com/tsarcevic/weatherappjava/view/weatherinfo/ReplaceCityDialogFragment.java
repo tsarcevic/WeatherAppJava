@@ -1,6 +1,5 @@
 package com.tsarcevic.weatherappjava.view.weatherinfo;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,11 +9,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.tsarcevic.weatherappjava.R;
-import com.tsarcevic.weatherappjava.listener.ItemClickListener;
+import com.tsarcevic.weatherappjava.listener.RecyclerItemClickListener;
 import com.tsarcevic.weatherappjava.model.local.City;
 import com.tsarcevic.weatherappjava.viewmodel.CityViewModel;
 
@@ -24,7 +22,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ReplaceCityDialogFragment extends DialogFragment implements ItemClickListener {
+public class ReplaceCityDialogFragment extends DialogFragment implements RecyclerItemClickListener<City> {
 
     interface ButtonClickListener {
         void onButtonClicked(String cityName);
@@ -47,13 +45,12 @@ public class ReplaceCityDialogFragment extends DialogFragment implements ItemCli
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.replace_city_fragment_dialog, container, false);
         // Do all the stuff to initialize your custom view
-        return v;
+        return inflater.inflate(R.layout.replace_city_fragment_dialog, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         initUI();
@@ -61,7 +58,8 @@ public class ReplaceCityDialogFragment extends DialogFragment implements ItemCli
     }
 
     private void initUI() {
-        adapter = new ReplaceCityDialogAdapter(this);
+        adapter = new ReplaceCityDialogAdapter(getActivity());
+        adapter.setListener(this);
 
         LinearLayoutManager linear = new LinearLayoutManager(getActivity());
 
@@ -70,7 +68,9 @@ public class ReplaceCityDialogFragment extends DialogFragment implements ItemCli
     }
 
     private void initViewModel() {
-        cityViewModel = new CityViewModel(getActivity().getApplication());
+        if (getActivity() != null) {
+            cityViewModel = new CityViewModel(getActivity().getApplication());
+        }
         observeData();
         cityViewModel.getAllCities();
     }
@@ -81,10 +81,10 @@ public class ReplaceCityDialogFragment extends DialogFragment implements ItemCli
     }
 
     private void showCities(List<City> cities) {
-        if(cities.size() == 0) {
+        if (cities.size() == 0) {
             cityListRecycler.setVisibility(View.GONE);
         }
-        adapter.setCityName(cities);
+        adapter.setData(cities);
     }
 
     private void showError(Boolean aBoolean) {
@@ -96,7 +96,7 @@ public class ReplaceCityDialogFragment extends DialogFragment implements ItemCli
     }
 
     @Override
-    public void onItemClicked(int position) {
-        buttonClickListener.onButtonClicked(adapter.getCity(position));
+    public void onItemClicked(City item) {
+        buttonClickListener.onButtonClicked(item.getCityName());
     }
 }
