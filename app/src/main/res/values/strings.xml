@@ -3,5 +3,9 @@
 
     <string name="facebook_app_id">2015095211931582</string>
     <string name="fb_login_protocol_scheme">fb2015095211931582</string>
-    <string name="continue_without_login">Nastavi bez prijave</string>
+    <string name="continue_without_login">Continue without login</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_text">Login</string>
+    <string name="register_text">Register</string>
 </resources>

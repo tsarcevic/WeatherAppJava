@@ -7,9 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -25,7 +26,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.tsarcevic.weatherappjava.Constants;
 import com.tsarcevic.weatherappjava.R;
 import com.tsarcevic.weatherappjava.base.BaseActivity;
@@ -37,15 +42,57 @@ import org.json.JSONObject;
 import java.util.Arrays;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class LoginActivity extends BaseActivity {
 
     private CallbackManager callbackManager;
     private GoogleSignInClient googleSignInClient;
+    private FirebaseUser currentUser;
+    private FirebaseAuth mAuth;
 
     @BindView(R.id.activity_login_facebook_button)
     LoginButton loginButton;
+    @BindView(R.id.activity_login_username)
+    EditText username;
+    @BindView(R.id.activity_login_password)
+    EditText password;
+
+    @OnClick(R.id.activity_login_register_button)
+    public void onRegisterClicked() {
+        if (isUsernameAndPasswordValid()) {
+            mAuth.createUserWithEmailAndPassword(username.getText().toString().trim(), password.getText().toString().trim())
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                currentUser = mAuth.getCurrentUser();
+                                startActivity(new Intent(LoginActivity.this, WeatherInfoView.class));
+                            } else {
+                                Toast.makeText(LoginActivity.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+    }
+
+    @OnClick(R.id.activity_login_login_button)
+    public void onLoginClicked() {
+        if (isUsernameAndPasswordValid()) {
+            mAuth.signInWithEmailAndPassword(username.getText().toString().trim(), password.getText().toString().trim())
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(mAuth.getCurrentUser() != null) {
+                                Toast.makeText(LoginActivity.this, "Logiran", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Nije logiran", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+    }
 
     @OnClick(R.id.activity_login_google_button)
     public void onGoogleButtonClicked() {
@@ -65,13 +112,21 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initUI() {
+        initFirebaseLogin();
         initFacebookLogin();
         initGoogleLogin();
+    }
+
+    private void initFirebaseLogin() {
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        if (mAuth.getCurrentUser() != null) {
+            startWeatherActivity(null, false);
+        }
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
         startWeatherActivity(signInAccount, false);
         if (AccessToken.getCurrentAccessToken() != null) {
@@ -178,5 +233,26 @@ public class LoginActivity extends BaseActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             startWeatherActivity(task.getResult(), false);
         }
+    }
+
+    private boolean isUsernameAndPasswordValid() {
+        boolean isValid = true;
+
+        if (TextUtils.isEmpty(username.getText().toString().trim())) {
+            isValid = false;
+        }
+
+        if (TextUtils.isEmpty(password.getText().toString().trim())) {
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // TODO: add setContentView(...) invocation
+        ButterKnife.bind(this);
     }
 }
